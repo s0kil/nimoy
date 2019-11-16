@@ -1,12 +1,13 @@
-import nimoy, nimoy/executors, os, sets
+import os, sets
+import ../src/nimoy, ../src/nimoy/executors
 
 type
   # define a family of messages for the loader
   LoaderMessageKind = enum
     loaderStart
     loaderFinished
-  
-  LoaderMessage = object 
+
+  LoaderMessage = object
     case kind: LoaderMessageKind
     of loaderStart:
       loadFile: string
@@ -16,7 +17,8 @@ type
 proc longThreadBlockingRoutine(file: string) =
   sleep(1000)
 
-proc createLoaderWorker(system: ActorSystem, parent: ActorRef[LoaderMessage]): ActorRef[LoaderMessage] =
+proc createLoaderWorker(system: ActorSystem, parent: ActorRef[
+    LoaderMessage]): ActorRef[LoaderMessage] =
   #
   # Calls a thread blocking routine upon receiving the load message,
   # then terminates
@@ -31,16 +33,17 @@ proc createLoaderWorker(system: ActorSystem, parent: ActorRef[LoaderMessage]): A
       # only handles loaderStart messages
       discard
 
-proc createLoader(system: ActorSystem, files: seq[string]): ActorRef[LoaderMessage] =
+proc createLoader(system: ActorSystem, files: seq[string]): ActorRef[
+    LoaderMessage] =
   #
-  # Spawns an actor for each file name, 
-  # waits for all the workers for "files" to terminate, 
+  # Spawns an actor for each file name,
+  # waits for all the workers for "files" to terminate,
   # then terminates itself.
-  # 
+  #
   system.initActor() do (self: ActorRef[LoaderMessage]):
     # We initialize the actor using the longer form (initActor),
     # useful to define actor-local state.
-    
+
     var pending = files.len
     for f in files:
       self ! LoaderMessage(kind: loaderStart, loadFile: f)
@@ -61,6 +64,6 @@ proc createLoader(system: ActorSystem, files: seq[string]): ActorRef[LoaderMessa
 let executor = createSimpleExecutor(4) # 4 threads
 let system = createActorSystem(executor)
 
-let loader = system.createLoader( @["foo", "bar", "baz", "qux", "quux"] )
+let loader = system.createLoader( @["foo", "bar", "baz", "qux", "quux"])
 
 system.awaitTermination()

@@ -1,4 +1,4 @@
-import nimoy
+import ../src/nimoy
 
 type
   IntMessage = object
@@ -12,14 +12,15 @@ let ping = system.createActor() do (self: ActorRef[IntMessage], m: IntMessage):
   if m.value != 10:
     m.sender.send(IntMessage(value: m.value + 1, sender: self))
   else:
-    let pingChild = system.createActor() do (self: ActorRef[IntMessage], m: IntMessage):
+    let pingChild = system.createActor() do (self: ActorRef[IntMessage],
+        m: IntMessage):
       echo "pingChild has received ", m.value
       m.sender.send(IntMessage(value: m.value + 1, sender: self))
     pingChild.send(m)
 
 
 let pong = system.createActor() do (self: ActorRef[IntMessage], m: IntMessage):
-  echo "pong has received ", m.value  
+  echo "pong has received ", m.value
   m.sender.send(IntMessage(value: m.value + 1, sender: self))
 
 # kick it off

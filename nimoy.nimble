@@ -29,7 +29,7 @@ task become, "compile become":
 
 task spawn, "compile spawn":
   buildExample("spawn")
-  
+
 task kill, "compile kill":
   buildExample("kill")
 

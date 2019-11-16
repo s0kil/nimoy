@@ -1,4 +1,4 @@
-import times, os
+import os, times
 
 type
   Task* = proc(): TaskStatus {.gcsafe.}
@@ -20,9 +20,9 @@ type
 
   ExecutorCommand* = object
     case kind*: ExecutorCommandKind
-    of executorTaskSubmit: 
+    of executorTaskSubmit:
       submittedTask*: ScheduledTask
-    of executorTaskReturned: 
+    of executorTaskReturned:
       scheduledTask*: ScheduledTask
     of executorShutdown:
       discard
@@ -41,17 +41,17 @@ type
   ExecutorObj* = object
     workers*: seq[Worker]
     channel*: Channel[ExecutorCommand]
-    thread*:  Thread[Executor]
-    status*:   ExecutorStatus
+    thread*: Thread[Executor]
+    status*: ExecutorStatus
   Executor* = ptr ExecutorObj
   ExecutorLoop* = proc(self: Executor) {.thread.}
 
   WorkerId* = int
   WorkerObj* = object
-    id*:      WorkerId
+    id*: WorkerId
     channel*: Channel[ScheduledTask]
-    thread*:  Thread[Worker]
-    parent*:  Executor
+    thread*: Thread[Worker]
+    parent*: Executor
   Worker* = ptr WorkerObj
   WorkerLoop* = proc(self: Worker) {.thread.}
 
@@ -79,7 +79,8 @@ proc awaitTermination*(executor: Executor, maxSeconds: float) =
     current = epochTime()
 
 proc submit(executor: Executor, task: ScheduledTask) =
-  executor.channel.send(ExecutorCommand(kind: executorTaskSubmit, submittedTask: task))
+  executor.channel.send(ExecutorCommand(kind: executorTaskSubmit,
+      submittedTask: task))
 
 proc submit*(executor: Executor, task: Task) =
   executor.submit(task.toScheduledTask)
@@ -96,6 +97,6 @@ proc createExecutor*(workers: int, executorStrategy: ExecutorStrategy): Executor
   result.channel.open()
   result.status = executorRunning
   for i in 0..<workers:
-    let w = createWorker(i, executorStrategy.workerLoop, result) 
+    let w = createWorker(i, executorStrategy.workerLoop, result)
     result.workers.add(w)
   createThread(result.thread, executorStrategy.executorLoop, result)

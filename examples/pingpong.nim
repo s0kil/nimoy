@@ -1,8 +1,8 @@
-import nimoy
+import ../src/nimoy
 
 type
   # you can Ping someone that will Pong back
-  Ping = object 
+  Ping = object
     replyTo: ActorRef[Pong]
   # you can Pong someone that will Ping back
   Pong = object

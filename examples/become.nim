@@ -1,4 +1,4 @@
-import nimoy
+import ../src/nimoy
 
 type
   IntMessage = object

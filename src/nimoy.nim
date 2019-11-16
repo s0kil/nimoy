@@ -4,7 +4,7 @@ type
 
   ActorInit*[A] =
     proc(self: ActorRef[A])
-    
+
   ActorBehavior*[A] =
     proc(message: A)
 
@@ -12,24 +12,24 @@ type
     proc(ctx: ActorRef[A], message: A)
 
   ActorChannelObj[A] = object
-    channel:  Channel[A]
+    channel: Channel[A]
     behavior: ActorBehavior[A]
 
   ActorChannel[A] = ptr ActorChannelObj[A]
 
   SystemMessage* = enum
     sysKill
-  
+
   Actor*[A] = object
-    sys:  ActorChannel[SystemMessage]
+    sys: ActorChannel[SystemMessage]
     main: ActorChannel[A]
 
   ActorRef*[A] = object
     actor: Actor[A]
-    
+
   Envelope*[A] = object
-    message*:  A
-    sender*:   ActorRef[A]
+    message*: A
+    sender*: ActorRef[A]
 
   ActorSystem* = object
     executor: Executor
@@ -81,7 +81,7 @@ proc destroyActorChannel*[A](actorChannel: ActorChannel[A]) =
 
 proc allocActor[A](): Actor[A] =
   result.main = allocActorChannel[A]()
-  result.sys  = allocActorChannel[SystemMessage]()
+  result.sys = allocActorChannel[SystemMessage]()
 
 proc destroyActor*[A](actor: Actor[A]) =
   deallocShared(actor.main)
@@ -93,7 +93,7 @@ proc createActor*[A](init: ActorInit[A]): ActorRef[A] =
   init(actorRef)
   actorRef
 
-proc createActor*[A](receive: ActorBehavior[A]): ActorRef[A] =    
+proc createActor*[A](receive: ActorBehavior[A]): ActorRef[A] =
   proc init(self: ActorRef[A]) =
     self.become(ActorBehavior[A](receive))
 
@@ -123,7 +123,7 @@ proc toTask*[A](actorRef: ActorRef[A]): Task =
 
 proc createActorSystem*(executor: Executor): ActorSystem =
   result.executor = executor
-  
+
 proc createActorSystem*(): ActorSystem =
   createActorSystem(createSimpleExecutor(2))
 
@@ -146,7 +146,8 @@ proc createActor*[A](system: ActorSystem, receive: ActorBehavior[A]): ActorRef[A
   system.executor.submit(task)
   actorRef
 
-proc createActor*[A](system: ActorSystem, receive: ActorContextBehavior[A]): ActorRef[A] =
+proc createActor*[A](system: ActorSystem, receive: ActorContextBehavior[
+    A]): ActorRef[A] =
   let actorRef = createActor[A](receive = receive)
   let task = actorRef.toTask
   system.executor.submit(task)
